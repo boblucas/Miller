@@ -10,29 +10,52 @@ public partial class MainWindow: Gtk.Window
 	private GCodeWriter gcodeWriter;
 	private bool buttonIsInStartState;
 	Thread thread;
+	private Timer timeout;
 	
 	public MainWindow (): base (Gtk.WindowType.Toplevel)
 	{
 		Build ();
-		//gcodeWriter = new GCodeWriter ("/dev/ttyACM0", 9600);
+		gcodeWriter = new GCodeWriter();
 		buttonIsInStartState = true;
 		
-		//thread = new Thread(gcodeWriter.parseGcodeFile);
-		//thread.IsBackground = true;
-		
-		
+		thread = new Thread(gcodeWriter.parseGcodeFile);
+		thread.IsBackground = true;
+	}
+	
+	private void handleFailedSerialConnection()
+	{
+		printToTerminalView("A working serial connection could not be established, check serial port and baud rate.");
+	}
+	
+	public void printToTerminalView(string s)
+	{
+		terminalView1.Buffer.Text += s + "\n";
+		terminalView2.Buffer.Text += s + "\n";
+		terminalView3.Buffer.Text += s + "\n";
+		textAddedToTerminalView();
+	}
+	
+	protected void textAddedToTerminalView ()
+	{
+		this.terminalView1.ScrollToIter(terminalView1.Buffer.EndIter, 0.0, false, 0.0, 0.0);
+		this.terminalView2.ScrollToIter(terminalView2.Buffer.EndIter, 0.0, false, 0.0, 0.0);
+		this.terminalView3.ScrollToIter(terminalView3.Buffer.EndIter, 0.0, false, 0.0, 0.0);
 	}
 	
 	public void writeVerboseGCode(String s)
 	{
 		gcodeWriter.write(s);
-		terminalView.Buffer.Text += s + "\n";
+		terminalView1.Buffer.Text += s + "\n";
+		terminalView2.Buffer.Text += s + "\n";
+		terminalView3.Buffer.Text += s + "\n";
 		textAddedToTerminalView();
 	}
 	
 	public void arduinoNotReady()
 	{
-		terminalView.Buffer.Text += "\nArduino is not ready\n";
+		terminalView1.Buffer.Text += "\nArduino is not ready.\n";
+		terminalView2.Buffer.Text += "\nArduino is not ready.\n";
+		terminalView3.Buffer.Text += "\nArduino is not ready.\n";
 		textAddedToTerminalView();
 	}
 	
@@ -45,7 +68,6 @@ public partial class MainWindow: Gtk.Window
 	protected void onFileActivated (object sender, System.EventArgs e)
 	{
 		this.startStopButton.Sensitive = true;
-		//Works
 	}
 	
 	protected void onStartStopClicked (object sender, System.EventArgs e)
@@ -55,13 +77,11 @@ public partial class MainWindow: Gtk.Window
 			//button is in the 'start' state
 			if (gcodeWriter.arduinoIsReady ()) 
 			{
-				terminalView.Buffer.Text += "\nArduino is ready\n";
-				textAddedToTerminalView();
 				buttonIsInStartState = false;
 				this.abortButton.Sensitive = true;
-				this.startStopButton.Label = "Pause";				
+				////
+				this.startStopButton.Label = "Pause";
 				gcodeWriter.loadFile(fileChooserButton.Filename);
-				
 				thread.Start ();
 			} 
 			else 
@@ -251,36 +271,66 @@ public partial class MainWindow: Gtk.Window
 		}
 	}
 
-	protected void textAddedToTerminalView ()
+	protected void portConnectButtonClicked (object sender, System.EventArgs e)
 	{
-		this.terminalView.ScrollToIter(terminalView.Buffer.EndIter, 0.0, false, 0.0, 0.0);
-	}
-
-	protected void GCodeCommandEntrykeyPressed (object o, Gtk.KeyPressEventArgs args)
-	{
-		terminalView.Buffer.Text += "\nArduino is not ready\n";
-	}
-	
-	
-	private int getRealHeight(Container container)
-	{
-		int total = 0;
-		foreach(Widget child in container.AllChildren)
+		try
 		{
-			if(child is Box)
-				total += getRealHeight(child as Container);
-			else
-				total += child.Allocation.Height + 3;
-			
-			if(container is HBox && total > 10)
-				break;
+			gcodeWriter.connect(portEntry.ActiveText, Convert.ToInt32(baudrateEntry.ActiveText));
 		}
-		return total;
+		catch(IOException e2)
+		{
+			printToTerminalView(e2.Message);
+			return;
+		}
+		
+		while(true)
+			if(gcodeWriter.Port.BytesToRead > 0)
+				break;
+		
+		//timeout = new Timer(onTimeout, null, 5000, 5000);
+		//gcodeWriter.Port.DataReceived += new SerialDataReceivedEventHandler(HandleGcodeWriterPortDataReceived);
+	}
 	
+	private void onTimeout(object sender)
+	{
+		timeout.Dispose();
+		timeout = null;
+		gcodeWriter.Port.DataReceived -= HandleGcodeWriterPortDataReceived;
+		//we have hit our timeout
+		handleFailedSerialConnection();
 	}
 
-	protected void onPageSwitch (object o, Gtk.SwitchPageArgs args)
+	void HandleGcodeWriterPortDataReceived (object sender, SerialDataReceivedEventArgs e)
 	{
-		tabView.HeightRequest = getRealHeight(tabView.GetNthPage((int)args.PageNum) as Container);
+		Console.WriteLine("Any data");
+		timeout.Dispose();
+		timeout = null;
+		gcodeWriter.Port.DataReceived -= HandleGcodeWriterPortDataReceived;
+		printToTerminalView("result:" + gcodeWriter.Port.ReadLine());
+		if(gcodeWriter.Port.ReadLine().Contains("W"))
+		{
+			//WOHOO arduino worked
+			portConnectButton.Sensitive = false;
+			portDisconnectButton.Sensitive = true;
+			printToTerminalView("Succesfully opened serial connection on port " + portEntry.ActiveText + " with baud rate " + baudrateEntry.ActiveText + ".");
+		}
+		else
+		{
+			//We got some crap, probably because of the wrong baudrate, or a different device.
+			handleFailedSerialConnection();
+		}
+	}
+
+	protected void portDisconnectButtonClicked (object sender, System.EventArgs e)
+	{
+		gcodeWriter.disconnect();
+		portConnectButton.Sensitive = true;
+		portDisconnectButton.Sensitive = false;
+		printToTerminalView("Serial connection succesfully closed.");
+	}
+
+	protected void searchForPortsButtonClicked (object sender, System.EventArgs e)
+	{
+		throw new System.NotImplementedException ();
 	}
 }

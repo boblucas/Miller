@@ -3,23 +3,23 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="miller GUI/MainWindow.cs">
     <Files>
       <File FileName="miller GUI/Main.cs" Line="18" Column="3" />
-      <File FileName="miller GUI/GCodeWriter.cs" Line="34" Column="4" />
-      <File FileName="miller GUI/MainWindow.cs" Line="268" Column="48" />
+      <File FileName="miller GUI/MainWindow.cs" Line="23" Column="3" />
+      <File FileName="miller GUI/GCodeWriter.cs" Line="30" Column="49" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
           <Node name="miller GUI" expanded="True">
             <Node name="References" expanded="True" />
-            <Node name="UserInterface" expanded="True">
-              <Option id="ShowAllFiles" value="True" />
-            </Node>
+            <Node name="UserInterface" expanded="True" />
             <Node name="MainWindow.cs" selected="True" />
           </Node>
         </State>
       </Pad>
       <Pad Id="ClassPad">
-        <State expanded="True" selected="True" />
+        <State expanded="True">
+          <Node name="miller GUI" expanded="True" selected="True" />
+        </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>

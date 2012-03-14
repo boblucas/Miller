@@ -8,42 +8,123 @@
     <widget-library name="glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <widget-library name="../bin/Debug/miller GUI.exe" internal="true" />
   </import>
-  <widget class="Gtk.Window" id="MainWindow" design-size="493 412">
+  <widget class="Gtk.Window" id="MainWindow" design-size="525 412">
     <property name="MemberName" />
     <property name="Title" translatable="yes">MainWindow</property>
     <property name="WindowPosition">CenterOnParent</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
-      <widget class="Gtk.VBox" id="vbox1">
+      <widget class="Gtk.Notebook" id="tabView">
         <property name="MemberName" />
-        <property name="Spacing">6</property>
+        <property name="CanFocus">True</property>
+        <property name="CurrentPage">2</property>
         <child>
-          <widget class="Gtk.Notebook" id="tabView">
+          <widget class="Gtk.VBox" id="vbox7">
             <property name="MemberName" />
-            <property name="CanFocus">True</property>
-            <property name="CurrentPage">0</property>
-            <signal name="SwitchPage" handler="onPageSwitch" />
+            <property name="Spacing">6</property>
+            <property name="BorderWidth">5</property>
             <child>
-              <widget class="Gtk.VBox" id="vbox3">
+              <widget class="Gtk.HBox" id="hbox8">
                 <property name="MemberName" />
-                <property name="HeightRequest">123</property>
                 <property name="Spacing">6</property>
                 <child>
-                  <widget class="Gtk.Label" id="label3">
+                  <widget class="Gtk.VBox" id="vbox10">
                     <property name="MemberName" />
-                    <property name="LabelProp" translatable="yes">Select G-code file to be streamed below:</property>
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.Label" id="label1">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">Serial port:</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label2">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">Baud rate:</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="label4">
+                        <property name="MemberName" />
+                        <property name="LabelProp" translatable="yes">Status:</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">False</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="Position">0</property>
-                    <property name="AutoSize">True</property>
+                    <property name="AutoSize">False</property>
                     <property name="Expand">False</property>
                     <property name="Fill">False</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="Gtk.FileChooserButton" id="fileChooserButton">
+                  <widget class="Gtk.VBox" id="vbox1">
                     <property name="MemberName" />
-                    <signal name="SelectionChanged" handler="onFileActivated" />
+                    <property name="Spacing">6</property>
+                    <child>
+                      <widget class="Gtk.ComboBoxEntry" id="portEntry">
+                        <property name="MemberName" />
+                        <property name="IsTextCombo">True</property>
+                        <property name="Items" translatable="yes">/dev/ttyACM0</property>
+                        <property name="Active">0</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">0</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.ComboBoxEntry" id="baudrateEntry">
+                        <property name="MemberName" />
+                        <property name="IsTextCombo">True</property>
+                        <property name="Items" translatable="yes">110
+300
+600
+1200
+2400
+4800
+9600
+14400
+19200
+28800
+38400
+56000
+57600
+115200</property>
+                        <property name="Active">6</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">1</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Label" id="connectedOrNotConnectedLabel">
+                        <property name="MemberName" />
+                        <property name="WidthRequest">208</property>
+                        <property name="LabelProp" translatable="yes">Not connected</property>
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">False</property>
+                      </packing>
+                    </child>
                   </widget>
                   <packing>
                     <property name="Position">1</property>
@@ -53,36 +134,59 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="Gtk.HBox" id="hbox2">
+                  <widget class="Gtk.VBox" id="vbox9">
                     <property name="MemberName" />
                     <property name="Spacing">6</property>
                     <child>
-                      <widget class="Gtk.Button" id="startStopButton">
+                      <widget class="Gtk.Button" id="portConnectButton">
                         <property name="MemberName" />
-                        <property name="Sensitive">False</property>
                         <property name="CanFocus">True</property>
-                        <property name="Type">TextOnly</property>
-                        <property name="Label" translatable="yes">Start</property>
+                        <property name="Type">TextAndIcon</property>
+                        <property name="Icon">stock:gtk-apply Menu</property>
+                        <property name="Label" translatable="yes">Connect!</property>
                         <property name="UseUnderline">True</property>
-                        <signal name="Clicked" handler="onStartStopClicked" />
+                        <signal name="Clicked" handler="portConnectButtonClicked" after="yes" />
                       </widget>
                       <packing>
                         <property name="Position">0</property>
-                        <property name="AutoSize">False</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="Gtk.Button" id="abortButton">
+                      <widget class="Gtk.Button" id="portDisconnectButton">
                         <property name="MemberName" />
                         <property name="Sensitive">False</property>
                         <property name="CanFocus">True</property>
-                        <property name="Type">TextOnly</property>
-                        <property name="Label" translatable="yes">Abort</property>
+                        <property name="Type">TextAndIcon</property>
+                        <property name="Icon">stock:gtk-cancel Menu</property>
+                        <property name="Label" translatable="yes">Disconnect!</property>
                         <property name="UseUnderline">True</property>
+                        <signal name="Clicked" handler="portDisconnectButtonClicked" after="yes" />
                       </widget>
                       <packing>
                         <property name="Position">1</property>
-                        <property name="AutoSize">False</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="Gtk.Button" id="searchForPortsButton">
+                        <property name="MemberName" />
+                        <property name="CanFocus">True</property>
+                        <property name="Type">TextAndIcon</property>
+                        <property name="Icon">stock:gtk-find Menu</property>
+                        <property name="Label" translatable="yes">Search for serial ports</property>
+                        <property name="UseUnderline">True</property>
+                        <signal name="Clicked" handler="searchForPortsButtonClicked" after="yes" />
+                      </widget>
+                      <packing>
+                        <property name="Position">2</property>
+                        <property name="AutoSize">True</property>
+                        <property name="Expand">False</property>
+                        <property name="Fill">False</property>
                       </packing>
                     </child>
                   </widget>
@@ -95,24 +199,178 @@
                 </child>
               </widget>
               <packing>
-                <property name="TabFill">False</property>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.Label" id="GCodeStreamingTab">
+              <widget class="Gtk.ScrolledWindow" id="scrolledwindow1">
                 <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">G-code streaming</property>
+                <property name="CanFocus">True</property>
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="terminalView1">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes" />
+                  </widget>
+                </child>
               </widget>
               <packing>
-                <property name="type">tab</property>
+                <property name="PackType">End</property>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
               </packing>
             </child>
+          </widget>
+        </child>
+        <child>
+          <widget class="Gtk.Label" id="serialPortConnectionTab">
+            <property name="MemberName" />
+            <property name="LabelProp" translatable="yes">Serial port connection</property>
+          </widget>
+          <packing>
+            <property name="type">tab</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.VBox" id="vbox3">
+            <property name="MemberName" />
+            <property name="HeightRequest">123</property>
+            <property name="Spacing">6</property>
+            <property name="BorderWidth">5</property>
+            <child>
+              <widget class="Gtk.Label" id="label3">
+                <property name="MemberName" />
+                <property name="LabelProp" translatable="yes">Select G-code file to be streamed below:</property>
+              </widget>
+              <packing>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.FileChooserButton" id="fileChooserButton">
+                <property name="MemberName" />
+                <signal name="SelectionChanged" handler="onFileActivated" />
+              </widget>
+              <packing>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.HBox" id="hbox2">
+                <property name="MemberName" />
+                <property name="Spacing">6</property>
+                <child>
+                  <widget class="Gtk.Button" id="startStopButton">
+                    <property name="MemberName" />
+                    <property name="Sensitive">False</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Type">TextAndIcon</property>
+                    <property name="Icon">stock:gtk-media-play Menu</property>
+                    <property name="Label" translatable="yes">Start</property>
+                    <property name="UseUnderline">True</property>
+                    <signal name="Clicked" handler="onStartStopClicked" />
+                  </widget>
+                  <packing>
+                    <property name="Position">0</property>
+                    <property name="AutoSize">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Button" id="abortButton">
+                    <property name="MemberName" />
+                    <property name="Sensitive">False</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Type">TextAndIcon</property>
+                    <property name="Icon">stock:gtk-cancel Menu</property>
+                    <property name="Label" translatable="yes">Abort</property>
+                    <property name="UseUnderline">True</property>
+                  </widget>
+                  <packing>
+                    <property name="Position">1</property>
+                    <property name="AutoSize">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="Gtk.Button" id="panicButton1">
+                    <property name="MemberName" />
+                    <property name="Sensitive">False</property>
+                    <property name="CanFocus">True</property>
+                    <property name="Type">TextAndIcon</property>
+                    <property name="Icon">stock:gtk-dialog-warning Menu</property>
+                    <property name="Label" translatable="yes">Emergency stop</property>
+                    <property name="UseUnderline">True</property>
+                  </widget>
+                  <packing>
+                    <property name="PackType">End</property>
+                    <property name="Position">2</property>
+                    <property name="AutoSize">True</property>
+                    <property name="Expand">False</property>
+                    <property name="Fill">False</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="Position">2</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="Gtk.ScrolledWindow" id="scrolledwindow2">
+                <property name="MemberName" />
+                <property name="CanFocus">True</property>
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="terminalView2">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes" />
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="PackType">End</property>
+                <property name="Position">3</property>
+                <property name="AutoSize">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="Position">1</property>
+            <property name="TabFill">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.Label" id="GCodeStreamingTab">
+            <property name="MemberName" />
+            <property name="LabelProp" translatable="yes">G-code streaming</property>
+          </widget>
+          <packing>
+            <property name="type">tab</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="Gtk.VBox" id="vbox2">
+            <property name="MemberName" />
+            <property name="Spacing">6</property>
+            <property name="BorderWidth">5</property>
             <child>
               <widget class="Gtk.HBox" id="hbox1">
                 <property name="MemberName" />
                 <property name="Spacing">6</property>
                 <child>
-                  <widget class="Gtk.VBox" id="vbox2">
+                  <widget class="Gtk.VBox" id="vbox4">
                     <property name="MemberName" />
                     <property name="Spacing">6</property>
                     <child>
@@ -121,15 +379,16 @@
                         <property name="ShadowType">In</property>
                         <property name="BorderWidth">2</property>
                         <child>
-                          <widget class="Gtk.Alignment" id="GtkAlignment">
+                          <widget class="Gtk.Alignment" id="GtkAlignment3">
                             <property name="MemberName" />
                             <property name="Xalign">0</property>
                             <property name="Yalign">0</property>
                             <property name="LeftPadding">12</property>
                             <child>
-                              <widget class="Gtk.VBox" id="vbox4">
+                              <widget class="Gtk.VBox" id="vbox5">
                                 <property name="MemberName" />
                                 <property name="Spacing">6</property>
+                                <property name="BorderWidth">2</property>
                                 <child>
                                   <widget class="Gtk.HBox" id="hbox3">
                                     <property name="MemberName" />
@@ -140,7 +399,6 @@
                                         <property name="CanFocus">True</property>
                                         <property name="IsEditable">True</property>
                                         <property name="InvisibleChar">•</property>
-                                        <signal name="KeyPressEvent" handler="GCodeCommandEntrykeyPressed" />
                                       </widget>
                                       <packing>
                                         <property name="Position">0</property>
@@ -231,7 +489,8 @@
                               <widget class="Gtk.Button" id="motorOnButton">
                                 <property name="MemberName" />
                                 <property name="CanFocus">True</property>
-                                <property name="Type">TextOnly</property>
+                                <property name="Type">TextAndIcon</property>
+                                <property name="Icon">stock:gtk-apply Menu</property>
                                 <property name="Label" translatable="yes">Turn motor ON</property>
                                 <property name="UseUnderline">True</property>
                                 <signal name="Clicked" handler="turnMotorOnButtonWasClicked" />
@@ -248,7 +507,8 @@
                                 <property name="MemberName" />
                                 <property name="Sensitive">False</property>
                                 <property name="CanFocus">True</property>
-                                <property name="Type">TextOnly</property>
+                                <property name="Type">TextAndIcon</property>
+                                <property name="Icon">stock:gtk-cancel Menu</property>
                                 <property name="Label" translatable="yes">Turn motor OFF</property>
                                 <property name="UseUnderline">True</property>
                                 <signal name="Clicked" handler="turnMotorOffButtonWasClicked" />
@@ -269,7 +529,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="Gtk.Button" id="panicButton">
+                          <widget class="Gtk.Button" id="panicButton2">
                             <property name="MemberName" />
                             <property name="CanFocus">True</property>
                             <property name="Type">TextAndIcon</property>
@@ -304,9 +564,10 @@
                     <property name="ShadowType">In</property>
                     <property name="BorderWidth">2</property>
                     <child>
-                      <widget class="Gtk.VBox" id="vbox5">
+                      <widget class="Gtk.VBox" id="vbox8">
                         <property name="MemberName" />
                         <property name="Spacing">6</property>
+                        <property name="BorderWidth">2</property>
                         <child>
                           <widget class="Gtk.Button" id="xplusButton">
                             <property name="MemberName" />
@@ -482,43 +743,42 @@
                 </child>
               </widget>
               <packing>
-                <property name="Position">1</property>
+                <property name="Position">0</property>
+                <property name="AutoSize">True</property>
+                <property name="Expand">False</property>
+                <property name="Fill">False</property>
               </packing>
             </child>
             <child>
-              <widget class="Gtk.Label" id="manualControlTab">
+              <widget class="Gtk.ScrolledWindow" id="scrolledwindow3">
                 <property name="MemberName" />
-                <property name="LabelProp" translatable="yes">manual control</property>
+                <property name="CanFocus">True</property>
+                <property name="ShadowType">In</property>
+                <child>
+                  <widget class="Gtk.TextView" id="terminalView3">
+                    <property name="MemberName" />
+                    <property name="CanFocus">True</property>
+                    <property name="Text" translatable="yes" />
+                  </widget>
+                </child>
               </widget>
               <packing>
-                <property name="type">tab</property>
+                <property name="Position">1</property>
+                <property name="AutoSize">True</property>
               </packing>
             </child>
           </widget>
           <packing>
-            <property name="Position">0</property>
-            <property name="AutoSize">False</property>
-            <property name="Expand">False</property>
+            <property name="Position">2</property>
           </packing>
         </child>
         <child>
-          <widget class="Gtk.ScrolledWindow" id="terminalViewScrolledWindow">
+          <widget class="Gtk.Label" id="manualControlTab">
             <property name="MemberName" />
-            <property name="CanFocus">True</property>
-            <property name="ShadowType">In</property>
-            <property name="WindowPlacement">BottomRight</property>
-            <child>
-              <widget class="Gtk.TextView" id="terminalView">
-                <property name="MemberName" />
-                <property name="CanFocus">True</property>
-                <property name="Editable">False</property>
-                <property name="Text" translatable="yes" />
-              </widget>
-            </child>
+            <property name="LabelProp" translatable="yes">manual control</property>
           </widget>
           <packing>
-            <property name="Position">1</property>
-            <property name="AutoSize">True</property>
+            <property name="type">tab</property>
           </packing>
         </child>
       </widget>

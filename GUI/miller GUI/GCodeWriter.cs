@@ -1,26 +1,61 @@
 using System;
 using System.IO.Ports;
 using System.Collections.Generic;
+using System.IO;
 
 namespace millerGUI
 {
 	public class GCodeWriter
 	{
 		private SerialPort port;
+		public SerialPort Port
+		{
+			get	{ return port; }
+		}
+		
 		private Boolean arduinoReady = false;
 		private List<string> commands;
+		private bool connected = false;
 		
-		public GCodeWriter (String portname, int baudrate)
+		public GCodeWriter ()
 		{
-			port = new SerialPort(portname, baudrate);
-			port.Open();
-			
 			commands = new List<string>();
 		}
 		
-		public void write(String s)
+		public bool connect(string serialPort, int baudrate)
 		{
+			try
+			{
+				Console.WriteLine("Connecting:" + serialPort + " at " + baudrate);
+				port = new SerialPort(serialPort, baudrate);
+				port.Handshake = Handshake.None;
+				port.Parity = Parity.None;
+				port.StopBits = StopBits.One;
+				port.DataBits = 8;
+				port.Open();
+			}
+			catch(IOException e)
+			{
+				return false;
+			}
+			connected = true;
+			return true;
+		}
+		
+		public void disconnect()
+		{
+			if(connected)
+				port.Close();
+			connected = false;
+		}			
+		
+		public bool write(String s)
+		{
+			if(!connected)
+				return false;
+			
 			port.Write(s);
+			return true;
 		}
 		
 		public int[] interrogate()
@@ -32,6 +67,8 @@ namespace millerGUI
 		
 		public Boolean arduinoIsReady()
 		{
+			if(!connected)
+				return false;
 			while(port.BytesToRead > 0 && !arduinoReady)
 			{
 				int c = port.ReadChar();
