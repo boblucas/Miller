@@ -6,6 +6,8 @@
 
 #ifndef Miller_H_
 #define Miller_H_
+#define __PROG_TYPES_COMPAT__
+typedef char prog_char;
 #include "Arduino.h"
 //add your includes for the project Miller here
 
