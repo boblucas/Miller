@@ -2,100 +2,40 @@
  * Stepper.h
  *
  *  Created on: Feb 15, 2012
- *      Author: koen
+ *      Author: bob
  */
 
 #ifndef STEPPER_H_
 #define STEPPER_H_
 
-#include "State.h"
-#include "Graphics.h"
+#include "Settings.h"
 
 
 
-void sleep()
+void initStepper();
+void updateStepper();
+
+void sleep();
+void awake();
+
+struct Axis
 {
-	for(Axis* a = &axis[0]; a != lastAxis; a++)
-	{
-		a->localSleep = true;
-		a->doneAt = millis();
-	}
-}
+	bool direction;			//the state of the direction pin
+	bool stepState;			//the state of the step pin
+	bool localSleep;		//the state of the sleep pin
+	char pins;			//it is expected that pins+DIR is the dir pin of this axis, pins+STEP is the step etc.
+	unsigned long stepDelay;		//this is the amount of microseconds between each pulse
+	unsigned long lastIteration;	//this was the last time in micros since startup that we pulsed the motor
+	unsigned long doneAt;		//when position and expected are equal this tells us in micros when that happend
+	long position;			//our current position
+	long expected;			//what position we are travelling towards
+	long limit;			//The maximum range(both positive and negative) of the axis
+	double speed;			//What ratio of the total speed should this axis receive to make the head go at the expected angle
 
-void awake()
-{
-	for(Axis* a = &axis[0]; a != lastAxis; a++)
-	{
-		a->localSleep = false;
-		a->doneAt = 0;
-		digitalWrite(a->pins + SLEEP, false);
-	}
-}
+};
 
+extern Axis axis[AXISCOUNT];
+extern Axis* longest;
 
-void updateStepper()
-{
-	if(lastAcceleration + ACCELERATION_RATE <= millis())
-	{
-		lastAcceleration += ACCELERATION_RATE;
-		//int timeLeft = MIN_STEP_DELAY * abs(longest->expected - longest->position);
-
-		if(((INITIAL_STEP_DELAY / 3) * abs(longest->expected - longest->position)) >= (stepsFromStandstill * ACCELERATION_RATE) * 1000)
-		{
-			if(longest->stepDelay > MIN_STEP_DELAY)
-			{
-				speed = speed / ACCELERATION;
-				stepsFromStandstill++;
-			}
-		}
-		else if(stepsFromStandstill > 0)
-		{
-			speed = speed * (((ACCELERATION - 1) * 1.33) + 1.0);
-			stepsFromStandstill--;
-			if(stepsFromStandstill == 0)
-				speed = INITIAL_STEP_DELAY;
-		}
-
-		axis[0].stepDelay = axis[0].speed * speed;
-		axis[1].stepDelay = axis[1].speed * speed;
-		axis[2].stepDelay = axis[2].speed * speed;
-	}
-
-	for(int i = 0; i < AXISCOUNT; i++)
-	{
-		Axis& a = axis[i];
-
-		if(a.localSleep && a.doneAt + 10 < millis() && a.doneAt != 0)
-		{
-			digitalWrite(a.pins + SLEEP, true);
-			a.doneAt = 0;
-		}
-
-		if(a.localSleep) continue;
-
-		if(a.lastIteration + a.stepDelay <= micros() && (a.position != a.expected))
-		{
-			a.lastIteration = micros();
-			a.stepState = !a.stepState;
-
-			if(a.direction)
-				a.position--;
-			else
-				a.position++;
-
-			if(a.position <= -a.limit || a.position >= a.limit )
-				a.expected = a.position;
-
-			digitalWrite(a.pins + STEP, a.stepState);
-		}
-
-
-		if(a.position == a.expected)
-		{
-			a.localSleep = true;
-			a.doneAt = millis();
-		}
-	}
-}
 
 #endif /* STEPPER_H_ */
