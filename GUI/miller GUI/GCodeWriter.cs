@@ -67,6 +67,7 @@ namespace millerGUI
 		
 		public Boolean arduinoIsReady()
 		{
+			return true;
 			if(!connected)
 				return false;
 			while(port.BytesToRead > 0 && !arduinoReady)

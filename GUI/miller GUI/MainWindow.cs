@@ -8,7 +8,6 @@ using System.Threading;
 public partial class MainWindow: Gtk.Window
 {	
 	private GCodeWriter gcodeWriter;
-	private bool buttonIsInStartState;
 	Thread thread;
 	private Timer timeout;
 	
@@ -16,15 +15,17 @@ public partial class MainWindow: Gtk.Window
 	{
 		Build ();
 		gcodeWriter = new GCodeWriter();
-		buttonIsInStartState = true;
 		
 		thread = new Thread(gcodeWriter.parseGcodeFile);
 		thread.IsBackground = true;
 	}
 	
+	//perhaps on initialisation set the gcode streamer tab and the manual control tab to non sensitive?
+	
 	private void handleFailedSerialConnection()
 	{
-		printToTerminalView("A working serial connection could not be established, check serial port and baud rate.");
+		printToTerminalView("A working serial connection could not be established, please check serial port and baud rate.");
+		printToStatusBar("Serial connection failed.");
 	}
 	
 	public void printToTerminalView(string s)
@@ -33,6 +34,12 @@ public partial class MainWindow: Gtk.Window
 		terminalView2.Buffer.Text += s + "\n";
 		terminalView3.Buffer.Text += s + "\n";
 		textAddedToTerminalView();
+	}
+	
+	public void printToStatusBar(string s)
+	{
+		statusbar.Pop(0);
+		statusbar.Push(0, s);
 	}
 	
 	protected void textAddedToTerminalView ()
@@ -51,6 +58,19 @@ public partial class MainWindow: Gtk.Window
 		textAddedToTerminalView();
 	}
 	
+	public void writeVeryVerboseGCode(String s)
+	{
+		writeVerboseGCode(s);
+		printToStatusBar("Command '" + s + "' sent.");
+	}
+	
+	protected void clearTerminalButtonClicked (object sender, System.EventArgs e)
+	{
+		terminalView1.Buffer.Text = "";
+		terminalView2.Buffer.Text = "";
+		terminalView3.Buffer.Text = "";
+	}
+	
 	public void arduinoNotReady()
 	{
 		terminalView1.Buffer.Text += "\nArduino is not ready.\n";
@@ -67,39 +87,13 @@ public partial class MainWindow: Gtk.Window
 
 	protected void onFileActivated (object sender, System.EventArgs e)
 	{
-		this.startStopButton.Sensitive = true;
+		this.startButton.Sensitive = true;
+		printToTerminalView("File: '" + fileChooserButton.Filename + "' loaded.");
+		printToStatusBar("File: '" + fileChooserButton.Filename + "' loaded.");
+		//we should check for file type?
+		//bug when closing fileChooserDialogWindow: this functon triggers multiple times with trash as fileChooserButton.Filename
 	}
 	
-	protected void onStartStopClicked (object sender, System.EventArgs e)
-	{
-		if (buttonIsInStartState) {
-			
-			//button is in the 'start' state
-			if (gcodeWriter.arduinoIsReady ()) 
-			{
-				buttonIsInStartState = false;
-				this.abortButton.Sensitive = true;
-				////
-				this.startStopButton.Label = "Pause";
-				gcodeWriter.loadFile(fileChooserButton.Filename);
-				thread.Start ();
-			} 
-			else 
-			{
-				arduinoNotReady();
-			}
-		} 
-		else 
-		{
-			//button is in the 'pause' state
-			thread.Abort ();
-			writeVerboseGCode("G01 Z5");
-			buttonIsInStartState = true;
-			this.startStopButton.Label = "Start";
-			abortButton.Sensitive = false;
-		}
-	}
-
 	protected void turnMotorOnButtonWasClicked (object sender, System.EventArgs e)
 	{
 		if(gcodeWriter.arduinoIsReady())
@@ -107,6 +101,7 @@ public partial class MainWindow: Gtk.Window
 			//send m3 and make sensitive/not sensitive
 			writeVerboseGCode("M3");//turn motor on, as of yet to be implemented on Arduino
 			writeVerboseGCode("G04 P3");
+			printToStatusBar("Motor turned on.");
 			this.motorOnButton.Sensitive = false;
 			this.motorOffButton.Sensitive = true;
 		}
@@ -123,6 +118,7 @@ public partial class MainWindow: Gtk.Window
 			//send m5 and make sensitive/not sensitive
 			writeVerboseGCode("M5");//turn motor off, as of yet to be implemented on Arduino
 			writeVerboseGCode("G04 P3");
+			printToStatusBar("Motor turned off.");
 			this.motorOnButton.Sensitive = true;
 			this.motorOffButton.Sensitive = false;
 		}
@@ -138,11 +134,11 @@ public partial class MainWindow: Gtk.Window
 		{
 			if(prependG01Checkbutton.Active)
 			{
-				writeVerboseGCode("G01 " + GCodeCommandEntry.Text);
+				writeVeryVerboseGCode("G01 " + GCodeCommandEntry.Text);
 			}
 			else
 			{
-				writeVerboseGCode(GCodeCommandEntry.Text);
+				writeVeryVerboseGCode(GCodeCommandEntry.Text);
 			}
 		}
 		else
@@ -155,7 +151,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 X" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[0] +
@@ -175,7 +171,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 X" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[0] -
@@ -195,7 +191,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 Y" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[1] +
@@ -215,7 +211,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 Y" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[1] -
@@ -235,7 +231,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 Z" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[2] +
@@ -255,7 +251,7 @@ public partial class MainWindow: Gtk.Window
 	{
 		if(gcodeWriter.arduinoIsReady())
 		{
-			writeVerboseGCode(
+			writeVeryVerboseGCode(
 				"G01 Z" + 
 				Convert.ToString(
 						gcodeWriter.interrogate()[2] -
@@ -282,7 +278,7 @@ public partial class MainWindow: Gtk.Window
 			printToTerminalView(e2.Message);
 			return;
 		}
-		
+		printToStatusBar("Attempting to connect, please wait...");
 		while(true)
 			if(gcodeWriter.Port.BytesToRead > 0)
 				break;
@@ -313,6 +309,7 @@ public partial class MainWindow: Gtk.Window
 			portConnectButton.Sensitive = false;
 			portDisconnectButton.Sensitive = true;
 			printToTerminalView("Succesfully opened serial connection on port " + portEntry.ActiveText + " with baud rate " + baudrateEntry.ActiveText + ".");
+			printToStatusBar("Serial connection opened. (port " + portEntry.ActiveText + "@" + baudrateEntry.ActiveText + "baud)");
 		}
 		else
 		{
@@ -327,10 +324,97 @@ public partial class MainWindow: Gtk.Window
 		portConnectButton.Sensitive = true;
 		portDisconnectButton.Sensitive = false;
 		printToTerminalView("Serial connection succesfully closed.");
+		printToStatusBar("Serial connection closed.");
 	}
 
 	protected void searchForPortsButtonClicked (object sender, System.EventArgs e)
 	{
-		throw new System.NotImplementedException ();
+		string[] ports = System.IO.Ports.SerialPort.GetPortNames();
+		foreach(string port in ports)
+			printToTerminalView(port);
+		printToStatusBar("Serial ports retrieved and listed.");
+		//Not all ports get listed, only the ones that start with /dev/ttyS
+		//perhaps make a new class out of System.IO.Ports.SerialPort.GerPortNames()?
+	}
+
+	protected void startButtonClicked (object sender, System.EventArgs e)
+	{
+		//begin milling from file
+		if (gcodeWriter.arduinoIsReady ())
+			{
+				this.startButton.Sensitive = false;
+				this.abortButton.Sensitive = true;
+				this.pauseButton.Sensitive = true;
+				this.resumeButton.Sensitive = false;
+				this.panicButton1.Sensitive = true;
+				printToStatusBar("Milling...");
+				/*
+				gcodeWriter.loadFile(fileChooserButton.Filename);
+				thread.Start ();
+				*/
+			} 
+			else 
+			{
+				arduinoNotReady();
+			}
+	}
+
+	protected void abortButtonClicked (object sender, System.EventArgs e)
+	{
+		//abort milling, finish current command
+		this.startButton.Sensitive = true;
+		this.abortButton.Sensitive = false;
+		this.pauseButton.Sensitive = false;
+		this.resumeButton.Sensitive = false;
+		this.panicButton1.Sensitive = false;
+		//thread.Abort ();//right code?
+		//writeVerboseGCode("G01 Z5");
+		printToStatusBar("Milling aborted.");
+	}
+
+	protected void resumeButtonClicked (object sender, System.EventArgs e)
+	{
+		//should let milling resume at the command before 'pauseButton' or 'panicButton1' were clicked.
+		this.startButton.Sensitive = false;
+		this.abortButton.Sensitive = true;
+		this.pauseButton.Sensitive = true;
+		this.resumeButton.Sensitive = false;
+		this.panicButton1.Sensitive = true;
+		//code for resuming?
+		printToStatusBar("Milling resumed; milling...");
+	}
+
+	protected void pauseButtonClicked (object sender, System.EventArgs e)
+	{
+		//Interrupt milling, finish current command
+		//should be able to resume at previous command when 'resumeButton' is clicked
+		this.startButton.Sensitive = false;
+		this.abortButton.Sensitive = true;
+		this.pauseButton.Sensitive = false;
+		this.resumeButton.Sensitive = true;
+		this.panicButton1.Sensitive = false;
+		//thread.Abort ();
+		//writeVerboseGCode("G01 Z5");
+		printToStatusBar("Milling paused.");
+	}
+
+	protected void panicButton1Clicked (object sender, System.EventArgs e)
+	{
+		//Interrupt milling, don't even finish current command
+		//should be able to resume at previous command when 'resumeButton' is clicked
+		this.startButton.Sensitive = false;
+		this.abortButton.Sensitive = true;
+		this.pauseButton.Sensitive = false;
+		this.resumeButton.Sensitive = true;
+		this.panicButton1.Sensitive = false;
+		//interrupt code here?
+		printToStatusBar("Milling halted.");
+	}
+
+	protected void panicButton2Clicked (object sender, System.EventArgs e)
+	{
+		//Interrupt milling, don't even finish current command
+		//interrupt code here?
+		printToStatusBar("Milling halted.");
 	}
 }
