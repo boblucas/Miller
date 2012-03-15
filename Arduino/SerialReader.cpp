@@ -24,6 +24,7 @@ bool readingRequest = false;
 
 void parseRequest(const char* line)
 {
+	readingRequest = false;
 	int code = parseNumber(line);
 	switch(code)
 	{
@@ -50,9 +51,6 @@ void initSerialReader()
 {
 	Serial.begin(9600);
 	Serial.println('W');
-
-	for(int i = 0; i < 32; i++)
-	  lineBuffer[i] = 0;
 }
 void updateSerialReader()
 {
@@ -62,7 +60,7 @@ void updateSerialReader()
 
         if(*lineBuffer == '\n')
         {
-            lineBuffer = &buffer[0];
+            	lineBuffer = &buffer[0];
         	if(readingRequest)
         		parseRequest(lineBuffer);
         	else
