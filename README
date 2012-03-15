@@ -3,6 +3,6 @@ This repo contains a simple piece of code for controlling a 3D Milling machine.
 It only supports very basic gcode(intentional) which will work fine with the output of pycam.
 The goal is to make a robust and small driver that's easy to read and maintain and modify.
 
-It also contains a GUI which will allow you to easily execute and control batches of gcode and do some manuel work.
+It also contains a GUI which will allow you to easily execute and control batches of gcode and do some manual work.
 
 Right now we're testing on the Arduino UNO, but it's more powerful than needed.
