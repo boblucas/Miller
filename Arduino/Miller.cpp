@@ -16,6 +16,9 @@ void setup()
 	initSerialReader();
 	parseGCodeDelegate = &parseGcodeLine;
 	parserReadyDelegate = &parserReady;
+	serialSleepDelegate = &sleep;
+	serialWakeDelegate = &awake;
+
 }
 
 void loop()

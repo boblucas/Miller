@@ -9,6 +9,7 @@ public partial class MainWindow: Gtk.Window
 {	
 	private GCodeWriter gcodeWriter;
 	Thread thread;
+	Thread waitForArduino;
 	private Timer timeout;
 	
 	public MainWindow (): base (Gtk.WindowType.Toplevel)
@@ -279,43 +280,48 @@ public partial class MainWindow: Gtk.Window
 			return;
 		}
 		printToStatusBar("Attempting to connect, please wait...");
-		while(true)
-			if(gcodeWriter.Port.BytesToRead > 0)
-				break;
 		
-		//timeout = new Timer(onTimeout, null, 5000, 5000);
-		//gcodeWriter.Port.DataReceived += new SerialDataReceivedEventHandler(HandleGcodeWriterPortDataReceived);
+		timeout = new Timer(onTimeout, null, 5000, 5000);
+		waitForArduino = new Thread(waitTillLoaded);
+		waitForArduino.Start();
 	}
 	
+	private void waitTillLoaded()
+	{
+		try
+		{
+			while(!gcodeWriter.arduinoIsReady())
+			{
+			}
+		}
+		catch(System.Threading.ThreadAbortException) 
+		{
+		}
+		
+		
+		if(gcodeWriter.arduinoIsReady())
+		{
+			//WOHOO arduino worked
+			timeout.Dispose();
+			timeout = null;	
+			portConnectButton.Sensitive = false;
+			portDisconnectButton.Sensitive = true;
+			printToTerminalView("Succesfully opened serial connection on port " + portEntry.ActiveText + " with baud rate " + baudrateEntry.ActiveText + ".");
+			printToStatusBar("Serial connection opened. (port " + portEntry.ActiveText + "@" + baudrateEntry.ActiveText + "baud)");
+		}
+	}
+
 	private void onTimeout(object sender)
 	{
 		timeout.Dispose();
 		timeout = null;
-		gcodeWriter.Port.DataReceived -= HandleGcodeWriterPortDataReceived;
+		thread.Abort();
 		//we have hit our timeout
 		handleFailedSerialConnection();
 	}
 
 	void HandleGcodeWriterPortDataReceived (object sender, SerialDataReceivedEventArgs e)
 	{
-		Console.WriteLine("Any data");
-		timeout.Dispose();
-		timeout = null;
-		gcodeWriter.Port.DataReceived -= HandleGcodeWriterPortDataReceived;
-		printToTerminalView("result:" + gcodeWriter.Port.ReadLine());
-		if(gcodeWriter.Port.ReadLine().Contains("W"))
-		{
-			//WOHOO arduino worked
-			portConnectButton.Sensitive = false;
-			portDisconnectButton.Sensitive = true;
-			printToTerminalView("Succesfully opened serial connection on port " + portEntry.ActiveText + " with baud rate " + baudrateEntry.ActiveText + ".");
-			printToStatusBar("Serial connection opened. (port " + portEntry.ActiveText + "@" + baudrateEntry.ActiveText + "baud)");
-		}
-		else
-		{
-			//We got some crap, probably because of the wrong baudrate, or a different device.
-			handleFailedSerialConnection();
-		}
 	}
 
 	protected void portDisconnectButtonClicked (object sender, System.EventArgs e)

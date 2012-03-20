@@ -4,10 +4,8 @@
  *  Created on: Mar 14, 2012
  *      Author: bob
  */
-
-
 #include "SerialReader.h"
-#include "Arduino.h"
+#include "WProgram.h"
 #include "Utils.h"
 #include "Settings.h"
 #include "HardwareSerial.h"
@@ -15,6 +13,8 @@
 
 bool (*parserReadyDelegate) ();
 void (*parseGCodeDelegate) (const char* line);
+void (*serialSleepDelegate) ();
+void (*serialWakeDelegate) ();
 
 extern HardwareSerial Serial;
 
@@ -28,21 +28,27 @@ void parseRequest(const char* line)
 	int code = parseNumber(line);
 	switch(code)
 	{
-	case 0: //return position
+	case POSITION: //return position
 		Serial.write('X');
 		Serial.write( ((double)axis[0].position) / PULSES_PER_MM);
 		Serial.write('Y');
 		Serial.write( ((double)axis[1].position) / PULSES_PER_MM);
 		Serial.write('Z');
-		Serial.write( ((double)axis[2].position) / PULSES_PER_MM);
+		Serial.println( ((double)axis[2].position) / PULSES_PER_MM);
 		break;
-	case 1: //return destination
+	case DESTINATION: //return destination
 		Serial.write('X');
 		Serial.write( ((double)axis[0].expected) / PULSES_PER_MM);
 		Serial.write('Y');
 		Serial.write( ((double)axis[1].expected) / PULSES_PER_MM);
 		Serial.write('Z');
-		Serial.write( ((double)axis[2].expected) / PULSES_PER_MM);
+		Serial.println( ((double)axis[2].expected) / PULSES_PER_MM);
+		break;
+	case PAUSE:
+		serialSleepDelegate();
+		break;
+	case CONTINUE:
+		serialWakeDelegate();
 		break;
 	}
 }
@@ -60,7 +66,7 @@ void updateSerialReader()
 
         if(*lineBuffer == '\n')
         {
-            	lineBuffer = &buffer[0];
+            lineBuffer = &buffer[0];
         	if(readingRequest)
         		parseRequest(lineBuffer);
         	else
@@ -72,3 +78,4 @@ void updateSerialReader()
         	lineBuffer++;
     }
 }
+

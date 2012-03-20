@@ -5,7 +5,7 @@
  *      Author: bob
  */
 
-#include "Arduino.h"
+#include "WProgram.h"
 #include "Settings.h"
 #include <math.h>
 #include "GCode.h"

@@ -5,7 +5,7 @@
  *      Author: bob
  */
 
-#include "Arduino.h"
+#include "WProgram.h"
 #include "Stepper.h"
 #include "Settings.h"
 
@@ -74,6 +74,13 @@ void initStepper()
 
 void updateStepper()
 {
+	bool allAsleep = false;
+	for(int i = 0; i < AXISCOUNT && !allAsleep; i++)
+		allAsleep = axis[i].localSleep;
+
+	if(allAsleep)
+		return;
+
 	if(lastAcceleration + ACCELERATION_RATE <= millis())
 	{
 		lastAcceleration += ACCELERATION_RATE;
@@ -94,15 +101,12 @@ void updateStepper()
 			if(stepsFromStandstill == 0)
 				speed = INITIAL_STEP_DELAY;
 		}
-
-		axis[0].stepDelay = axis[0].speed * speed;
-		axis[1].stepDelay = axis[1].speed * speed;
-		axis[2].stepDelay = axis[2].speed * speed;
 	}
 
 	for(int i = 0; i < AXISCOUNT; i++)
 	{
 		Axis& a = axis[i];
+		a.stepDelay = axis[i].speed * speed;
 
 		if(a.localSleep && a.doneAt + 10 < millis() && a.doneAt != 0)
 		{
@@ -110,7 +114,8 @@ void updateStepper()
 			a.doneAt = 0;
 		}
 
-		if(a.localSleep) continue;
+		if(a.localSleep)
+			continue;
 
 		if(a.lastIteration + a.stepDelay <= micros() && (a.position != a.expected))
 		{
